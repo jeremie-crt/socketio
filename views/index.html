@@ -17,7 +17,7 @@
     <div id="contentUsername" class="modal-background">
         <form class="modal" id="formUsername" method="post">
             <h2>Pick a Username</h2>
-            <input autocomplete="on" id="inputUsername" name="username"  type="text">
+            <input autofocus autocomplete="on" id="inputUsername" name="username" type="text">
             <div class="loader hidden" id="loaderUsername"></div>
         </form>
     </div>
@@ -211,7 +211,8 @@
                 </div>
             </div>
             <div class="write">
-                <input type="text"/>
+                <input id="inputMessage" type="text" name="input_message" placeholder="write a message..."
+                       onclick="sendMessage()"/>
                 <a href="javascript:;" class="write-link send"></a>
             </div>
         </div>
@@ -228,8 +229,10 @@
         inputUsername = document.querySelector('#inputUsername'),
         username,
         allUsers,
-        loaderUsername = document.querySelector('#loaderUsername')
+        loaderUsername = document.querySelector('#loaderUsername'),
+        inputMessage = document.body.querySelector('#inputMessage')
 
+    //Username form input
     formUsername.addEventListener('submit', (e) => {
         e.preventDefault()
         let usernameWanted = inputUsername.value
@@ -238,6 +241,22 @@
         loaderUsername.classList.remove('hidden')
     })
 
+    //Message chat input
+    inputMessage.addEventListener('keydown', (e) => {
+        if (e.keyCode == 13) {
+            sendMessage()
+        }
+    })
+    //Get the value and send it to the server
+    function sendMessage() {
+        let text = inputMessage.value.trim()
+        if (text != '') {
+            socket.emit('sendNewMessage', text)
+            inputMessage.value = ''
+        }
+    }
+
+    //Manage unique username and update users list
     socket.on('acceptUsername', (_username, _allUsers) => {
         username = _username
         allUsers = _allUsers
@@ -253,17 +272,23 @@
         loaderUsername.classList.add('hidden')
     })
 
+    //Display a message when a new user is online
     socket.on('newUserConnected', (newUsername, _allUsers) => {
         allUsers = _allUsers
         updateUsers(allUsers)
         messageNewUserConnected(newUsername)
     })
 
+    //Display a message when a user leaves the chat
     socket.on('leftSessionUser', (_allUsers, oldUsername) => {
         allUsers = _allUsers
         updateUsers(allUsers)
         messageleftSessionUser(oldUsername)
     })
+
+    //Display new message entries
+    socket.on('confirmMessage', (message) => showMyMessage(message))
+    socket.on('sendingNewMessage', (message) => showMessage(message))
 
 </script>
 </body>

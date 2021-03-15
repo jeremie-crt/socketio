@@ -50,8 +50,8 @@ io.on('connection', (socket) => {
 
         //Check if username is unique
         let usernameTaken = false
-        for(let socketid in usernames) {
-            if(usernames[socketid] == usernameWanted) {
+        for (let socketid in usernames) {
+            if (usernames[socketid] == usernameWanted) {
                 usernameTaken = true
             }
         }
@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
         let timeFakeLoading = 0
         setTimeout(() => {
             //Actions
-            if(usernameTaken) {
+            if (usernameTaken) {
                 socket.emit('rejectUsername', usernameWanted)
             } else {
                 socket.join('users')
@@ -72,10 +72,19 @@ io.on('connection', (socket) => {
 
     })
 
+    socket.on('sendNewMessage', (message) => {
+        message.trim()
+        if (message != '') {
+            socket.to('users').emit('sendingNewMessage', message)
+            socket.emit('confirmMessage', message)
+        }
+
+    })
+
     //Log out event
     socket.on('disconnect', () => {
         console.log('disconnection from user ' + socket.id)
-        if(usernames[socket.id]) {
+        if (usernames[socket.id]) {
             let oldUsername = usernames[socket.id]
             delete usernames[socket.id]
             socket.to('users').emit('leftSessionUser', getUsernames(), oldUsername)
@@ -92,7 +101,7 @@ server.listen(port, () => {
 //Send array with usernames without indexes
 function getUsernames() {
     let users = []
-    for(let socketid in usernames) {
+    for (let socketid in usernames) {
         users.push(usernames[socketid])
     }
     return users
