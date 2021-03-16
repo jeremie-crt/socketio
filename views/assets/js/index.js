@@ -15,15 +15,11 @@ let friends = {
     };
 
 
-friends.all.forEach(function (f) {
-    f.addEventListener('mousedown', function () {
-        f.classList.contains('active') || setAciveChat(f);
-    });
-});
+updateFriends()
 
 checkLinkUsersModal()
 
-function setAciveChat(f) {
+function setActiveChat(f) {
     friends.list.querySelector('.active').classList.remove('active');
     f.classList.add('active');
     chat.current = chat.container.querySelector('.active-chat');
@@ -73,7 +69,10 @@ function closeModal() {
     document.body.classList.remove('modal-active')
 }
 
+/* END Modal */
 
+
+//Updates the top menu title wiht the current amount of users
 function updateUsers(users) {
     listUsers.innerHTML = ''
     for (let i in users) {
@@ -81,7 +80,6 @@ function updateUsers(users) {
     }
 
     let text = 'General Room(' + users.length + ')'
-
     friends.all[0].querySelector('.name').innerHTML = text
 
     if (chat.person == 'person0' || chat.person == null) {
@@ -93,7 +91,7 @@ let globalChat = chat.container.querySelector('.chat[data-chat=person0]')
 
 function messageNewUserConnected(newUsername) {
     let message = '<div class="conversation-start"><span>' + newUsername + ' is online !</span></div>'
-  globalChat.insertAdjacentHTML('beforeend', message)
+    globalChat.insertAdjacentHTML('beforeend', message)
 }
 
 function messageleftSessionUser(newUsername) {
@@ -102,13 +100,85 @@ function messageleftSessionUser(newUsername) {
 }
 
 //Display new message from user own input entry
-function showMyMessage(message) {
-  let text = '<div class="bubble me">' + message + '</div>'
-  globalChat.insertAdjacentHTML('beforeend', text)
+function showMyMessage(message, dataChat) {
+    let text = '<div class="bubble name me">' + message + '</div>'
+    chat.container.querySelector('.chat[data-chat="' + dataChat + '"]')
+        .insertAdjacentHTML('beforeend', text)
 }
 
 //Display new message to all users
-function showMessage(message) {
-  let text = '<div class="bubble you">' + message + '</div>'
-  globalChat.insertAdjacentHTML('beforeend', text)
+function showMessage(message, username, dataChat) {
+    let text = '<div class="bubble name you"><span class="username">' + username + '</span>' + message + '</div>'
+    chat.container.querySelector('.chat[data-chat="' + dataChat + '"]')
+        .insertAdjacentHTML('beforeend', text)
 }
+
+
+//Actions behavior on typing
+let someoneWriting = document.body.querySelector('.someoneWriting')
+
+function showSomeoneWriting(usernameWriting, dataChat) {
+    if (chat.person == dataChat || (dataChat == 'person0' && chat.person == null)) {
+        someoneWriting.innerHTML = usernameWriting + ' is writing...'
+        someoneWriting.classList.remove('none')
+    }
+}
+
+function removeSomeoneWriting(dataChat) {
+    if (chat.person == dataChat || (dataChat == 'person0' && chat.person == null)) {
+        someoneWriting.classList.add('none')
+    }
+}
+
+//Display all users chat in menu when connecting
+function setFriends(allUsers, allSocketIDs, ownUsername) {
+    for (let i = 0; i < allUsers.length; i++) {
+        if (ownUsername != allUsers[i]) {
+            addUserNewChat(allUsers[i], allSocketIDs[i])
+        }
+    }
+}
+
+//Reload chat links
+function updateFriends() {
+    friends.all = document.querySelectorAll('.left .person')
+    friends.all.forEach(function (f) {
+        f.addEventListener('mousedown', function () {
+            f.classList.contains('active') || setActiveChat(f);
+        });
+    });
+}
+
+//Create the menu with a new user
+function addUserNewChat(newUsername, newSocketId) {
+    let element = '<li class="person" data-chat="' + newSocketId + '"><span class="name">' + newUsername + '</span><br><span class="preview">Private chat</span></li>'
+
+    friends.list.insertAdjacentHTML('beforeend', element)
+
+    //Create new chat with user id
+    element = '<div class="chat" data-chat="' + newSocketId + '"></div>'
+    let lastChat = chat.container.querySelectorAll('.chat')
+    lastChat = lastChat[lastChat.length - 1]
+    lastChat.insertAdjacentHTML('afterend', element)
+
+    updateFriends()
+}
+
+//Delete chat user on leaving
+function removeUserChat(oldSocketID) {
+    //Switch chat if deleted
+    if(chat.person == oldSocketID) {
+        setActiveChat(friends.all[0])
+    }
+
+    //Delete menu chat user
+    let element = friends.list.querySelector('.person[data-chat="' + oldSocketID + '"]')
+    element.parentNode.removeChild(element)
+
+    //Delete chat user
+    element = chat.container.querySelector('.chat[data-chat="' + oldSocketID + '"]')
+    element.parentNode.removeChild(element)
+
+    updateFriends()
+}
+

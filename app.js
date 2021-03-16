@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const config = require('./config.json')
 const http = require('http')
 const socketio = require('socket.io')
+const striptags = require('striptags')
 
 
 //Globals
@@ -46,7 +47,7 @@ io.on('connection', (socket) => {
 
     //Set username event
     socket.on('setUsername', (usernameWanted) => {
-        usernameWanted = usernameWanted.trim()
+        usernameWanted = striptags(usernameWanted.trim())
 
         //Check if username is unique
         let usernameTaken = false
@@ -65,29 +66,43 @@ io.on('connection', (socket) => {
                 socket.join('users')
                 usernames[socket.id] = usernameWanted
                 let justUsernames = getUsernames()
-                socket.emit('acceptUsername', usernameWanted, justUsernames)
-                socket.to('users').emit('newUserConnected', usernameWanted, justUsernames)
+
+                socket.emit('acceptUsername', usernameWanted, justUsernames, getSocketIds())
+                socket.to('users').emit('newUserConnected', usernameWanted, socket.id, justUsernames)
             }
         }, timeFakeLoading)
 
     })
 
-    socket.on('sendNewMessage', (message) => {
-        message.trim()
+    socket.on('sendNewMessage', (message, dataChat) => {
+        message = striptags(message.trim())
         if (message != '') {
-            socket.to('users').emit('sendingNewMessage', message)
-            socket.emit('confirmMessage', message)
-        }
+            //Defines which socket to send the message and chat to show
+            let data = getInfoDataChat(dataChat, socket.id)
 
+            socket.to(data.roomToSend).emit('sendingNewMessage', message, usernames[socket.id], data.addContentToChat)
+            socket.emit('confirmMessage', message, data.dataChat)
+        }
+    })
+
+    //Behavior on typing
+    socket.on('startWriting', (dataChat) => {
+        let data = getInfoDataChat(dataChat, socket.id)
+
+        socket.to(data.roomToSend).emit('userStartWriting', usernames[socket.id], data.addContentToChat)
+    })
+    socket.on('stopWriting', (dataChat) => {
+        let data = getInfoDataChat(dataChat, socket.id)
+        socket.to(data.roomToSend).emit('userStopWriting', data.addContentToChat)
     })
 
     //Log out event
     socket.on('disconnect', () => {
-        console.log('disconnection from user ' + socket.id)
+        console.log('disconnection from user ' + usernames[socket.id] + ' with ID: ' + socket.id)
         if (usernames[socket.id]) {
             let oldUsername = usernames[socket.id]
             delete usernames[socket.id]
-            socket.to('users').emit('leftSessionUser', getUsernames(), oldUsername)
+            socket.to('users').emit('leftSessionUser', getUsernames(), oldUsername, socket.id)
         }
     })
 })
@@ -105,4 +120,24 @@ function getUsernames() {
         users.push(usernames[socketid])
     }
     return users
+}
+
+//Send array with socketIDs
+function getSocketIds() {
+    let socketIDs = []
+    for (let socketid in usernames) {
+        socketIDs.push(socketid)
+    }
+    return socketIDs
+}
+
+//Sends all info from dataChat
+function getInfoDataChat(dataChat, socketID) {
+    dataChat = dataChat == null ? 'person0' : dataChat
+
+    return {
+        roomToSend: dataChat == 'person0' ? 'users' : dataChat,
+        addContentToChat: dataChat == 'person0' ? dataChat : socketID,
+        dataChat: dataChat
+    }
 }

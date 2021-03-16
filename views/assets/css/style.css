@@ -610,3 +610,24 @@ body.modal-active {
 .none {
   display: none !important;
 }
+
+.container .right .bubble.name {
+  margin-bottom: 20px;
+}
+
+.bubble .username {
+  position: absolute;
+  top: -15px;
+  left: 0;
+  color: var(--grey);
+  font-size: 13px;
+}
+
+.someoneWriting {
+  position: absolute;
+  left: 0;
+  top: -20px;
+  color: var(--grey);
+  font-size: 14px;
+  opacity: 0.8;
+}

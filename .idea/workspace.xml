@@ -4,6 +4,9 @@
     <list default="true" id="9daa7dbe-6103-4f6a-abdf-c2f95ee5c512" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/views/assets/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/views/assets/css/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/views/assets/js/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/views/assets/js/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/views/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/views/index.html" afterDir="false" />
     </list>
@@ -74,7 +77,8 @@
       <option name="presentableId" value="Default" />
       <updated>1615798559174</updated>
       <workItem from="1615798560302" duration="25167000" />
-      <workItem from="1615841515157" duration="2799000" />
+      <workItem from="1615841515157" duration="2961000" />
+      <workItem from="1615885249744" duration="17232000" />
     </task>
     <servers />
   </component>
